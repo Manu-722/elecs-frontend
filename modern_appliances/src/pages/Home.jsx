@@ -1,14 +1,43 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { addToCart } from '../redux/cartSlice';
+import { toast } from 'react-toastify';
+
+// Fallback slides using existing media images
+const FALLBACK_SLIDES = [
+  {
+    id: 'f1',
+    name: 'Edenberg Sufuria Set',
+    description: 'Premium stainless steel sufuria set — perfect for every kitchen.',
+    price: 3500,
+    image: null,
+    rawSrc: 'http://localhost:8000/media/shoes/Edenberg_sufuria_set.jpeg',
+    is_offer: false,
+    category: 'Sufurias',
+  },
+  {
+    id: 'f2',
+    name: 'Hawk Sufuria',
+    description: 'Durable, energy-efficient cooking with the Hawk sufuria range.',
+    price: 2200,
+    image: null,
+    rawSrc: 'http://localhost:8000/media/shoes/Hawk_sufuria.jpeg',
+    is_offer: true,
+    offer_price: 1800,
+    category: 'Sufurias',
+  },
+];
 
 const formatKES = (n) =>
   new Intl.NumberFormat('en-KE', { style: 'currency', currency: 'KES', minimumFractionDigits: 0 }).format(n);
 
 export default function Home() {
-  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const isAuthenticated = useSelector((s) => s.auth?.isAuthenticated);
   const [products, setProducts] = useState([]);
   const [slideIndex, setSlideIndex] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [selectedProduct, setSelectedProduct] = useState(null);
 
   useEffect(() => {
     fetch('http://localhost:8000/api/products/')
@@ -20,16 +49,28 @@ export default function Home() {
       .catch(() => setLoading(false));
   }, []);
 
+  // Use real products for slides, fall back to static images
+  const slides = products.length > 0 ? products : FALLBACK_SLIDES;
+
+  const getImgSrc = (p) => p.rawSrc || `http://localhost:8000/media/${p.image}`;
+
+  const handleAddToCart = (p) => {
+    if (!isAuthenticated) { toast.error('Please login to add to cart'); return; }
+    dispatch(addToCart({ id: p.id, name: p.name, price: p.is_offer && p.offer_price ? p.offer_price : p.price, image: p.image, quantity: 1 }));
+    toast.success(`${p.name} added to cart!`);
+    setSelectedProduct(null);
+  };
+
   // Auto-advance slideshow
   useEffect(() => {
-    if (products.length === 0) return;
+    if (slides.length === 0) return;
     const t = setInterval(() => {
-      setSlideIndex((i) => (i + 1) % products.length);
+      setSlideIndex((i) => (i + 1) % slides.length);
     }, 3500);
     return () => clearInterval(t);
-  }, [products.length]);
+  }, [slides.length]);
 
-  const current = products[slideIndex];
+  const current = slides[slideIndex];
 
   return (
     <div className="min-h-screen bg-black">
@@ -40,23 +81,19 @@ export default function Home() {
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="w-10 h-10 border-4 border-amber-400 border-t-transparent rounded-full animate-spin" />
           </div>
-        ) : products.length === 0 ? (
-          <div className="absolute inset-0 flex flex-col items-center justify-center text-white">
-            <p className="text-5xl mb-4">🍳</p>
-            <p className="text-gray-400">No products yet. Check back soon.</p>
-          </div>
         ) : (
           <>
             {/* Slide images */}
-            {products.map((p, i) => (
+            {slides.map((p, i) => (
               <div
                 key={p.id}
                 className={`absolute inset-0 transition-opacity duration-1000 ${i === slideIndex ? 'opacity-100' : 'opacity-0'}`}
               >
                 <img
-                  src={`http://localhost:8000/media/${p.image}`}
+                  src={getImgSrc(p)}
                   alt={p.name}
                   className="w-full h-full object-cover"
+                  onError={(e) => { e.target.src = 'http://localhost:8000/media/shoes/Hawk_logo.jpeg'; }}
                 />
                 {/* Dark overlay */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />
@@ -88,16 +125,16 @@ export default function Home() {
 
                   <div className="flex gap-3">
                     <button
-                      onClick={() => navigate('/shop')}
+                      onClick={() => setSelectedProduct(current)}
                       className="bg-amber-400 text-black font-black px-8 py-3 rounded-full hover:bg-amber-300 active:scale-95 transition-all text-sm md:text-base"
                     >
-                      Shop Now
+                      View Details
                     </button>
                     <button
-                      onClick={() => navigate('/shop')}
+                      onClick={() => handleAddToCart(current)}
                       className="border border-white/30 text-white font-semibold px-8 py-3 rounded-full hover:bg-white/10 transition-all text-sm md:text-base"
                     >
-                      View All
+                      Add to Cart
                     </button>
                   </div>
                 </div>
@@ -106,7 +143,7 @@ export default function Home() {
 
             {/* Slide indicators */}
             <div className="absolute bottom-6 right-6 md:right-16 flex gap-2">
-              {products.map((_, i) => (
+              {slides.map((_, i) => (
                 <button
                   key={i}
                   onClick={() => setSlideIndex(i)}
@@ -121,13 +158,13 @@ export default function Home() {
 
             {/* Prev / Next arrows */}
             <button
-              onClick={() => setSlideIndex((i) => (i - 1 + products.length) % products.length)}
+              onClick={() => setSlideIndex((i) => (i - 1 + slides.length) % slides.length)}
               className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/70 text-white w-10 h-10 rounded-full flex items-center justify-center transition"
             >
               ‹
             </button>
             <button
-              onClick={() => setSlideIndex((i) => (i + 1) % products.length)}
+              onClick={() => setSlideIndex((i) => (i + 1) % slides.length)}
               className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/70 text-white w-10 h-10 rounded-full flex items-center justify-center transition"
             >
               ›
@@ -136,41 +173,38 @@ export default function Home() {
         )}
       </section>
 
-      {/* ── PRODUCT GRID PREVIEW ── */}
-      {products.length > 0 && (
-        <section className="bg-gray-950 py-14 px-4">
-          <div className="max-w-7xl mx-auto">
-            <div className="flex justify-between items-center mb-8">
-              <h2 className="text-white font-black text-2xl md:text-3xl">
-                Featured <span className="text-amber-400">Products</span>
-              </h2>
-              <button
-                onClick={() => navigate('/shop')}
-                className="text-amber-400 hover:text-amber-300 text-sm font-semibold flex items-center gap-1"
-              >
-                View All →
-              </button>
-            </div>
+      {/* ── PRODUCT GRID ── */}
+      <section className="bg-gray-950 py-14 px-4">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex justify-between items-center mb-8">
+            <h2 className="text-white font-black text-2xl md:text-3xl">
+              Featured <span className="text-amber-400">Products</span>
+            </h2>
+          </div>
 
+          {loading ? (
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-              {products.slice(0, 8).map((p) => (
+              {[...Array(4)].map((_, i) => <div key={i} className="bg-gray-900 rounded-2xl h-56 animate-pulse" />)}
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+              {(products.length > 0 ? products : FALLBACK_SLIDES).slice(0, 8).map((p) => (
                 <div
                   key={p.id}
-                  onClick={() => navigate('/shop')}
+                  onClick={() => setSelectedProduct(p)}
                   className="bg-gray-900 rounded-2xl overflow-hidden cursor-pointer hover:ring-2 hover:ring-amber-400 transition-all group"
                 >
                   <div className="relative overflow-hidden">
                     <img
-                      src={`http://localhost:8000/media/${p.image}`}
+                      src={getImgSrc(p)}
                       alt={p.name}
                       className="h-44 w-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      onError={(e) => { e.target.src = 'http://localhost:8000/media/shoes/Hawk_logo.jpeg'; }}
                     />
                     {p.is_offer && (
-                      <span className="absolute top-2 left-2 bg-amber-400 text-black text-xs font-black px-2 py-0.5 rounded-full">
-                        OFFER
-                      </span>
+                      <span className="absolute top-2 left-2 bg-amber-400 text-black text-xs font-black px-2 py-0.5 rounded-full">OFFER</span>
                     )}
-                    {!p.in_stock && (
+                    {p.in_stock === false && (
                       <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
                         <span className="text-white text-xs font-bold bg-black/80 px-3 py-1 rounded-full">Sold Out</span>
                       </div>
@@ -193,8 +227,88 @@ export default function Home() {
                 </div>
               ))}
             </div>
+          )}
+        </div>
+      </section>
+
+      {/* ── PRODUCT DETAIL MODAL ── */}
+      {selectedProduct && (
+        <div className="fixed inset-0 z-50 bg-black/80 flex items-end md:items-center justify-center p-0 md:p-4" onClick={() => setSelectedProduct(null)}>
+          <div
+            className="bg-gray-950 border border-gray-800 rounded-t-3xl md:rounded-3xl w-full max-w-lg max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="relative">
+              <img
+                src={getImgSrc(selectedProduct)}
+                alt={selectedProduct.name}
+                className="w-full h-64 object-cover rounded-t-3xl md:rounded-t-3xl"
+                onError={(e) => { e.target.src = 'http://localhost:8000/media/shoes/Hawk_logo.jpeg'; }}
+              />
+              <button
+                onClick={() => setSelectedProduct(null)}
+                className="absolute top-3 right-3 bg-black/60 text-white w-8 h-8 rounded-full flex items-center justify-center hover:bg-black transition"
+              >
+                ✕
+              </button>
+              {selectedProduct.is_offer && (
+                <span className="absolute top-3 left-3 bg-amber-400 text-black text-xs font-black px-3 py-1 rounded-full">OFFER</span>
+              )}
+            </div>
+
+            <div className="p-5 space-y-4">
+              <div>
+                <p className="text-amber-500 text-xs font-bold uppercase tracking-widest">{selectedProduct.category}</p>
+                <h2 className="text-white font-black text-xl mt-1">{selectedProduct.name}</h2>
+                <div className="mt-2">
+                  {selectedProduct.is_offer && selectedProduct.offer_price ? (
+                    <div className="flex items-center gap-3">
+                      <span className="text-gray-500 line-through text-sm">{formatKES(selectedProduct.price)}</span>
+                      <span className="text-amber-400 font-black text-2xl">{formatKES(selectedProduct.offer_price)}</span>
+                    </div>
+                  ) : (
+                    <span className="text-amber-400 font-black text-2xl">{formatKES(selectedProduct.price)}</span>
+                  )}
+                </div>
+              </div>
+
+              {selectedProduct.description && (
+                <p className="text-gray-400 text-sm leading-relaxed">{selectedProduct.description}</p>
+              )}
+
+              {/* Specs */}
+              {(selectedProduct.material || selectedProduct.wattage || selectedProduct.weight || selectedProduct.warranty) && (
+                <div className="grid grid-cols-2 gap-2">
+                  {[
+                    { label: 'Material', val: selectedProduct.material },
+                    { label: 'Wattage', val: selectedProduct.wattage },
+                    { label: 'Weight', val: selectedProduct.weight },
+                    { label: 'Warranty', val: selectedProduct.warranty },
+                    { label: 'Color', val: selectedProduct.color },
+                    { label: 'Dimensions', val: selectedProduct.dimensions },
+                  ].filter((s) => s.val).map((s) => (
+                    <div key={s.label} className="bg-gray-900 rounded-xl px-3 py-2">
+                      <p className="text-gray-500 text-xs">{s.label}</p>
+                      <p className="text-white text-sm font-semibold">{s.val}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <button
+                onClick={() => handleAddToCart(selectedProduct)}
+                disabled={selectedProduct.in_stock === false}
+                className={`w-full py-3.5 rounded-2xl font-black text-sm transition ${
+                  selectedProduct.in_stock === false
+                    ? 'bg-gray-800 text-gray-500 cursor-not-allowed'
+                    : 'bg-amber-400 text-black hover:bg-amber-300 active:scale-95'
+                }`}
+              >
+                {selectedProduct.in_stock === false ? 'Out of Stock' : '🛒 Add to Cart'}
+              </button>
+            </div>
           </div>
-        </section>
+        </div>
       )}
 
       {/* ── WHY HAWK ── */}
