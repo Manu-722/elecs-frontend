@@ -1,5 +1,43 @@
 @import 'tailwindcss';
 
+/* ── Theme Variables ────────────────────────────────────────────── */
+
+/* DARK theme — deep navy so the black logo is visible */
+.theme-dark {
+  --color-nav-bg:    #0f172a;   /* slate-900 — deep navy, not pure black */
+  --color-page-bg:   #0a0f1e;   /* even deeper navy for page body */
+  --color-card-bg:   #1e293b;   /* slate-800 */
+  --color-border:    #1e293b;   /* slate-800 */
+  --color-hover:     #1e293b;
+  --color-text:      #f1f5f9;   /* slate-100 */
+}
+
+/* LIGHT theme */
+.theme-light {
+  --color-nav-bg:    #f8fafc;   /* slate-50 */
+  --color-page-bg:   #f1f5f9;   /* slate-100 */
+  --color-card-bg:   #ffffff;
+  --color-border:    #e2e8f0;   /* slate-200 */
+  --color-hover:     #f1f5f9;
+  --color-text:      #0f172a;   /* slate-900 */
+}
+
+/* Semantic utility classes used across components */
+.nav-bg       { background-color: var(--color-nav-bg); }
+.page-bg      { background-color: var(--color-page-bg); }
+.nav-text     { color: var(--color-text); }
+.bg-hawk-card { background-color: var(--color-card-bg); }
+.border-hawk-border { border-color: var(--color-border); }
+.hover\:bg-hawk-hover:hover { background-color: var(--color-hover); }
+.bg-hawk-hover { background-color: var(--color-hover); }
+
+/* Apply page background to the theme root itself */
+.theme-dark,
+.theme-light {
+  background-color: var(--color-page-bg);
+  min-height: 100vh;
+}
+
 /* ── Custom Toast Overrides ─────────────────────────────────────── */
 .Toastify__toast {
   background: #111111 !important;

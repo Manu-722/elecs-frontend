@@ -20,10 +20,6 @@ import {
   setCart,
 } from './redux/cartSlice';
 import {
-  fetchWishlistFromServer,
-  clearWishlist,
-} from './redux/wishlistSlice';
-import {
   setUser,
   setAuthenticated,
   setToken,
@@ -37,13 +33,11 @@ import Shop from './pages/Shop';
 import Cart from './pages/Cart';
 import Checkout from './pages/Checkout';
 import ThankYou from './pages/ThankYou';
-import Wishlist from './pages/Wishlist';
+import FAQ from './pages/FAQ';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Register from './pages/Register';
-// import RequestReset from './pages/RequestReset';
 import RequestPasswordReset from './pages/RequestPasswordReset';
-// import ResetPassword from './components/auth/ResetPassword';
 import AdminDashboard from './admin/AdminDashboard';
 import ResetPassword from './pages/ResetPassword';
 import Profile from './pages/Profile';
@@ -79,6 +73,7 @@ const AppRoutes = () => {
   const dispatch = useDispatch();
   const { token, isAuthenticated, user } = useSelector((state) => state.auth);
   const cart = useSelector((state) => state.cart.items);
+  const themeMode = useSelector((s) => s.theme?.mode);
 
   useEffect(() => {
     const accessToken = getValidAccessToken();
@@ -97,9 +92,7 @@ const AppRoutes = () => {
         const lastKnown = localStorage.getItem('lastUsername');
         if (lastKnown && lastKnown !== userData.username) {
           localStorage.removeItem('cymanCart');
-          localStorage.removeItem('cymanWishlist');
           dispatch(clearCart());
-          dispatch(clearWishlist());
         }
 
         localStorage.setItem('lastUsername', userData.username);
@@ -118,27 +111,14 @@ const AppRoutes = () => {
           .catch((err) => {
             console.warn('Cart restore error:', err?.detail || err);
           });
-
-        dispatch(fetchWishlistFromServer())
-          .unwrap()
-          .then((items) => {
-            if (Array.isArray(items) && items.length > 0) {
-              toast.success(' Wishlist restored');
-            }
-          })
-          .catch((err) => {
-            console.warn('Wishlist restore error:', err?.detail || err);
-          });
       })
       .catch((err) => {
         console.error('Session restore failed:', err);
         dispatch(setAuthenticated(false));
         dispatch(setToken(null));
         dispatch(clearCart());
-        dispatch(clearWishlist());
         localStorage.removeItem('authToken');
         localStorage.removeItem('cymanCart');
-        localStorage.removeItem('cymanWishlist');
         toast.error(' Session expired. Please log in again.');
       });
   }, [dispatch, isAuthenticated]);
@@ -170,7 +150,7 @@ const AppRoutes = () => {
   }, [cart, isAuthenticated, token, user, dispatch]);
 
   return (
-    <>
+    <div className={themeMode === 'light' ? 'theme-light' : 'theme-dark'}>
       <Navbar />
       <Routes>
         <Route path="/" element={<Home />} />
@@ -178,17 +158,14 @@ const AppRoutes = () => {
         <Route path="/cart" element={<Cart />} />
         <Route path="/checkout" element={<PrivateRoute><Checkout /></PrivateRoute>} />
         <Route path="/thank-you" element={<ThankYou />} />
+        <Route path="/faq" element={<FAQ />} />
         <Route path="/admin-dashboard" element={<AdminDashboard />} />
         <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/wishlist" element={<Wishlist />} />
-        {/* <Route path="/request-reset" element={<RequestReset />} /> */}
-        <Route path="/request-password-reset" element={<RequestPasswordReset />} /> 
+        <Route path="/request-password-reset" element={<RequestPasswordReset />} />
         <Route path="/reset" element={<ResetPassword />} />
-        {/* <Route path="/reset/:uidb64/:token" element={<ResetPassword />} /> */}
-        {/* <Route path="/request-password-reset" element={<PasswordReset />} /> */}
 
       </Routes>  
       <Footer />
@@ -212,7 +189,7 @@ const AppRoutes = () => {
         }}
         progressStyle={{ background: '#f59e0b' }}
       />
-    </>
+    </div>
   );
 };
 

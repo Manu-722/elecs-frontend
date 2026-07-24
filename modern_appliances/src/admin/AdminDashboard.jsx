@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
 const ADMIN_EMAILS = ['admin1@induction.com', 'admin2@induction.com'];
-const CATEGORIES = ['Sufurias', 'Non-Stick Pans', 'Induction Cookers', 'Offers'];
+const CATEGORIES = ['Sufurias & Cookware', 'Non-Stick Pans', 'Induction Cookers', 'Offers'];
 const API = 'http://localhost:8000/api';
 
 const getToken = () => {

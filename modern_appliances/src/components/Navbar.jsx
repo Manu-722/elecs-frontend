@@ -55,12 +55,12 @@ const Navbar = () => {
         </div>
       )}
 
-      <nav className="bg-black border-b border-gray-800 px-4 md:px-8 py-3 flex items-center justify-between sticky top-0 z-40">
+      <nav className="nav-bg border-b border-hawk-border px-4 md:px-8 py-3 flex items-center justify-between sticky top-0 z-40">
         <Link to="/" className="flex items-center gap-2.5">
           <img src="http://localhost:8000/media/shoes/Hawk_logo.jpeg" alt="Hawk"
             className="h-9 w-9 rounded-full object-cover border-2 border-amber-400"
             onError={(e) => { e.target.style.display = 'none'; }} />
-          <span className="text-white font-black text-lg hidden sm:block tracking-tight">
+          <span className="nav-text font-black text-lg hidden sm:block tracking-tight">
             Hawk <span className="text-amber-400">Life</span>
           </span>
         </Link>
@@ -136,7 +136,7 @@ const Navbar = () => {
       </nav>
 
       {menuOpen && (
-        <div className="md:hidden bg-gray-950 border-b border-gray-800 px-6 py-5 space-y-4 z-30">
+        <div className="md:hidden nav-bg border-b border-hawk-border px-6 py-5 space-y-4 z-30">
           {isAuthenticated ? (
             <>
               {/* Hawk logo + first name */}
