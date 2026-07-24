@@ -1,1 +1,77 @@
-@import 'tailwindcss'
+@import 'tailwindcss';
+
+/* ── Custom Toast Overrides ─────────────────────────────────────── */
+.Toastify__toast {
+  background: #111111 !important;
+  border: 1px solid #2a2a2a !important;
+  border-radius: 14px !important;
+  color: #ffffff !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6) !important;
+  padding: 14px 16px !important;
+  min-height: 52px !important;
+}
+
+.Toastify__toast--success {
+  border-left: 3px solid #f59e0b !important;
+}
+
+.Toastify__toast--error {
+  border-left: 3px solid #6b7280 !important;
+}
+
+.Toastify__toast--info {
+  border-left: 3px solid #d97706 !important;
+}
+
+.Toastify__toast--warning {
+  border-left: 3px solid #fbbf24 !important;
+}
+
+.Toastify__progress-bar {
+  background: #f59e0b !important;
+  height: 2px !important;
+}
+
+.Toastify__close-button {
+  color: #6b7280 !important;
+  opacity: 1 !important;
+}
+
+.Toastify__close-button:hover {
+  color: #f59e0b !important;
+}
+
+.Toastify__toast-icon svg {
+  fill: #f59e0b !important;
+}
+
+/* Success icon amber */
+.Toastify__toast--success .Toastify__toast-icon svg {
+  fill: #f59e0b !important;
+}
+
+/* Error icon gray */
+.Toastify__toast--error .Toastify__toast-icon svg {
+  fill: #9ca3af !important;
+}
+
+/* Smooth slide-in animation */
+.Toastify__slide-enter--top-right {
+  animation: slideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+@keyframes slideInRight {
+  from { transform: translateX(110%); opacity: 0; }
+  to   { transform: translateX(0);    opacity: 1; }
+}
+
+/* ── Scrollbar ──────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #0a0a0a; }
+::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: #f59e0b; }
+
+/* ── Selection ──────────────────────────────────────────────────── */
+::selection { background: #f59e0b33; color: #f59e0b; }

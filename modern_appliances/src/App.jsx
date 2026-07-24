@@ -45,8 +45,9 @@ import Register from './pages/Register';
 import RequestPasswordReset from './pages/RequestPasswordReset';
 // import ResetPassword from './components/auth/ResetPassword';
 import AdminDashboard from './admin/AdminDashboard';
-// import PasswordReset from './components/PasswordReset';
-import ResetPassword from './pages/ResetPassword'; 
+import ResetPassword from './pages/ResetPassword';
+import Profile from './pages/Profile';
+import ForgotPassword from './pages/ForgotPassword';
 
 import { CartProvider } from './context/CartContext';
 import { AuthProvider } from './context/AuthContext';
@@ -178,9 +179,10 @@ const AppRoutes = () => {
         <Route path="/checkout" element={<PrivateRoute><Checkout /></PrivateRoute>} />
         <Route path="/thank-you" element={<ThankYou />} />
         <Route path="/admin-dashboard" element={<AdminDashboard />} />
+        <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
         <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/wishlist" element={<Wishlist />} />
         {/* <Route path="/request-reset" element={<RequestReset />} /> */}
         <Route path="/request-password-reset" element={<RequestPasswordReset />} /> 
@@ -190,7 +192,26 @@ const AppRoutes = () => {
 
       </Routes>  
       <Footer />
-      <ToastContainer position="top-center" autoClose={4000} />
+      <ToastContainer
+        position="top-right"
+        autoClose={3500}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        pauseOnHover
+        draggable
+        theme="dark"
+        toastStyle={{
+          background: '#111111',
+          border: '1px solid #292929',
+          borderRadius: '14px',
+          color: '#ffffff',
+          fontSize: '13px',
+          fontWeight: '500',
+          boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
+        }}
+        progressStyle={{ background: '#f59e0b' }}
+      />
     </>
   );
 };

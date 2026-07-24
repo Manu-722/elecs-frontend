@@ -1,81 +1,37 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import {
-  signInWithEmailAndPassword,
-  setPersistence,
-  browserLocalPersistence,
-} from 'firebase/auth';
-import { auth } from '../firebase';
+import { createSlice } from '@reduxjs/toolkit';
 
-export const loginUser = createAsyncThunk(
-  'auth/loginUser',
-  async ({ email, password }, { rejectWithValue }) => {
-    try {
-      await setPersistence(auth, browserLocalPersistence);
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      const { user } = userCredential;
-      const token = await user.getIdToken();
-      return {
-        uid: user.uid,
-        email: user.email,
-        token,
-        displayName: user.displayName, // ✅ added for navbar greeting
-      };
-    } catch (err) {
-      const msg = err?.code?.split('/')[1]?.replace(/-/g, ' ') || 'Unknown error';
-      return rejectWithValue(msg);
-    }
-  }
-);
+const saved = (() => {
+  try { return JSON.parse(localStorage.getItem('hawkUser')) || null; } catch { return null; }
+})();
 
 const authSlice = createSlice({
   name: 'auth',
   initialState: {
-    user: null,
-    isAuthenticated: false, // ✅ new
-    status: 'idle',
-    error: null,
+    user: saved,
+    isAuthenticated: !!saved,
+    token: saved?.token || null,
   },
   reducers: {
-    logoutUser: (state) => {
-      state.user = null;
-      state.isAuthenticated = false; // ✅ new
-      state.status = 'idle';
-      state.error = null;
-    },
-    setToken: (state, action) => {
-      if (!state.user) state.user = {};
-      state.user.token = action.payload;
-    },
-    setAuthenticated: (state, action) => {
-      state.isAuthenticated = action.payload; // ✅ simplified
-    },
-    setUser: (state, action) => {
+    setUser(state, action) {
       state.user = action.payload;
+      localStorage.setItem('hawkUser', JSON.stringify(action.payload));
     },
-  },
-  extraReducers: (builder) => {
-    builder
-      .addCase(loginUser.pending, (state) => {
-        state.status = 'loading';
-        state.error = null;
-      })
-      .addCase(loginUser.fulfilled, (state, action) => {
-        state.user = action.payload;
-        state.isAuthenticated = true; // ✅ new
-        state.status = 'succeeded';
-      })
-      .addCase(loginUser.rejected, (state, action) => {
-        state.status = 'failed';
-        state.error = action.payload;
-      });
+    setToken(state, action) {
+      state.token = action.payload;
+    },
+    setAuthenticated(state, action) {
+      state.isAuthenticated = action.payload;
+    },
+    logoutUser(state) {
+      state.user = null;
+      state.isAuthenticated = false;
+      state.token = null;
+      localStorage.removeItem('hawkUser');
+      localStorage.removeItem('authToken');
+      localStorage.removeItem('lastUsername');
+    },
   },
 });
 
-export const {
-  logoutUser,
-  setToken,
-  setAuthenticated,
-  setUser,
-} = authSlice.actions;
-
+export const { setUser, setToken, setAuthenticated, logoutUser } = authSlice.actions;
 export default authSlice.reducer;
